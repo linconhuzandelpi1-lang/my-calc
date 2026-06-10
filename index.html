@@ -3,25 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Huza Calc 52</title>
+    <title>👑 Huza Calc 52</title>
     <style>
-        body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif; }
-        .calc { width: 320px; background: #000; padding: 20px; border-radius: 40px; border: 1px solid #333; }
-        #display { width: 100%; height: 100px; background: transparent; border: none; color: white; text-align: right; font-size: 60px; margin-bottom: 10px; outline: none; }
-        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        button { height: 70px; width: 70px; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; color: white; transition: 0.2s; }
-        .num { background: #333; }
-        .op { background: #ff9f0a; }
-        .spec { background: #a5a5a5; color: black; }
-        button:active { opacity: 0.7; }
-        .zero { grid-column: span 2; width: 152px; border-radius: 40px; text-align: left; padding-left: 30px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Падающие эмодзи */
+        .emoji {
+            position: fixed;
+            font-size: 30px;
+            animation: fall linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+            }
+        }
+
+        .calc {
+            width: 360px;
+            background: rgba(10, 10, 10, 0.98);
+            padding: 25px;
+            border-radius: 35px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #FFD700;
+            font-size: 22px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px #FFD700;
+            font-weight: bold;
+        }
+
+        #display {
+            width: 100%;
+            height: 100px;
+            background: transparent;
+            border: none;
+            color: white;
+            text-align: right;
+            font-size: 52px;
+            margin-bottom: 10px;
+            outline: none;
+            font-weight: 300;
+        }
+
+        #subtitle {
+            text-align: center;
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 20px;
+            min-height: 20px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            color: white;
+            transition: all 0.15s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        button:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        button:hover {
+            filter: brightness(1.15);
+        }
+
+        .num {
+            background: #333333;
+        }
+
+        .op {
+            background: #FF9F0A;
+        }
+
+        .spec {
+            background: #A5A5A5;
+            color: black;
+        }
+
+        .equals {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .zero {
+            grid-column: span 2;
+            border-radius: 40px;
+        }
+
+        /* Анимации */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-15px) rotate(-2deg); }
+            75% { transform: translateX(15px) rotate(2deg); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease 3;
+        }
+
+        @keyframes flash {
+            0%, 100% { background: rgba(10, 10, 10, 0.98); }
+            50% { background: rgba(255, 69, 0, 0.9); }
+        }
+
+        .flash {
+            animation: flash 0.3s ease 3;
+        }
     </style>
 </head>
 <body>
-    <div class="calc">
+    <div class="calc" id="calc">
+        <h1>👑 HUZA CALC 52 👑</h1>
         <input type="text" id="display" readonly value="0">
+        <div id="subtitle">Самый прикольный калькулятор</div>
         <div class="buttons">
-            <button class="spec" onclick="clearDisplay()">AC</button>
+            <button class="spec" onclick="clearAll()">AC</button>
             <button class="spec" onclick="append('/')">/</button>
             <button class="spec" onclick="append('*')">×</button>
             <button class="op" onclick="append('-')">-</button>
@@ -32,7 +163,7 @@
             <button class="num" onclick="append('4')">4</button>
             <button class="num" onclick="append('5')">5</button>
             <button class="num" onclick="append('6')">6</button>
-            <button class="op" onclick="calculate()">=</button>
+            <button class="equals" onclick="calculate()">=</button>
             <button class="num" onclick="append('1')">1</button>
             <button class="num" onclick="append('2')">2</button>
             <button class="num" onclick="append('3')">3</button>
@@ -42,32 +173,145 @@
 
     <script>
         const display = document.getElementById('display');
+        const subtitle = document.getElementById('subtitle');
+        const calc = document.getElementById('calc');
+        let clickCount = 0;
+
         const eggs = {
-            52: "52 — ДА ПРИБУДЕТ СИЛА! 👑",
+            52: "52 — ДА ПРИБУДЕТ СИЛА ХУЗЫ 👑",
             42: "42 — Ответ на всё 🤔",
-            228: "ООООООО ПОСХАЛКО 🔥",
-            69: "НИЦЕ 😏",
-            1488: "ООООООО ПОСХАЛКО 💀",
-            666: "Адский результат 😈",
-            1337: "LEET HACKER 💻"
+            228: "ООООООО ПОСХАЛКО 🔥🔥🔥",
+            69: "НИЦЕ 😏😏😏",
+            1488: "ЧТО ТЫ ДЕЛАЕШЬ 💀",
+            666: "Добро пожаловать в ад 😈",
+            1337: "LEET HACKER 💻",
+            0: "НОЛЬ. КАК ТВОИ ОЦЕНКИ 🫵",
+            100: "СОТКА! КРАСАВЧИК 💯",
+            404: "ОШИБКА НЕ НАЙДЕНА 404 🤖",
+            13: "НЕСЧАСТЛИВОЕ ЧИСЛО 👻"
         };
 
-        function append(char) {
-            if (display.value === "0") display.value = char;
-            else display.value += char;
+        const phrases = [
+            "Считаю... 🧮",
+            "Серьёзно? Это всё? 😐",
+            "Хуза одобряет 👑",
+            "Математика — это просто 🤓",
+            "Калькулятор не врёт 🤫"
+        ];
+
+        // Падающие эмодзи
+        function createEmoji() {
+            const emojis = ['👑', '🔥', '💯', '😏', '💀'];
+            const emoji = document.createElement('div');
+            emoji.className = 'emoji';
+            emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            emoji.style.left = Math.random() * 100 + '%';
+            emoji.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            document.body.appendChild(emoji);
+            setTimeout(() => emoji.remove(), 7000);
         }
 
-        function clearDisplay() { display.value = "0"; }
+        setInterval(createEmoji, 600);
+
+        function append(char) {
+            clickCount++;
+            if (clickCount === 52) {
+                shake();
+                flash();
+                alert("👑 Ты нажал кнопку 52 РАЗА!\nХУЗА СМОТРИТ НА ТЕБЯ 👑");
+            }
+
+            if (display.value === "0" || display.value === "Ошибка") {
+                display.value = char;
+            } else if (display.value.length < 12) {
+                display.value += char;
+            } else {
+                subtitle.textContent = "Куда столько цифр? 😤";
+            }
+        }
+
+        function clearAll() {
+            display.value = "0";
+            subtitle.textContent = "Всё сброшено 🧹";
+        }
 
         function calculate() {
             try {
-                let res = eval(display.value);
-                display.value = res;
-                if (eggs[res]) {
-                    setTimeout(() => alert(eggs[res]), 100);
+                const expr = display.value.replace(/×/g, '*').replace(/÷/g, '/');
+                let result = eval(expr);
+
+                if (!isFinite(result)) throw new Error();
+
+                if (Number.isInteger(result)) {
+                    result = result;
+                } else {
+                    result = Math.round(result * 1000000) / 1000000;
                 }
-            } catch {
-                display.value = "Ошибка";
+
+                display.value = result;
+
+                if (eggs[result]) {
+                    shake();
+                    flash();
+                    setTimeout(() => alert("🔥 ПАСХАЛКО!\n\n" + eggs[result]), 100);
+                } else if (Math.abs(result) > 999999) {
+                    shake();
+                    alert("💥 СЛИШКОМ БОЛЬШОЕ ЧИСЛО!\МАТЕМАТИКА СЛОМАЛАСЬ 💥");
+                } else {
+                    subtitle.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+                }
+
+            } catch (e) {
+                if (display.value.includes('/0')) {
+                    shake();
+                    flash();
+                    alert("💀 НА НОЛЬ ДЕЛИТЬ НЕЛЬЗЯ!\nТЫ СЛОМАЛ МАТЕМАТИКУ 💀");
+                    display.value = "0";
+                } else {
+                    display.value = "Ошибка";
+                    subtitle.textContent = "Что-то пошло не так 🤷";
+                }
+            }
+        }
+
+        function shake() {
+            calc.classList.add('shake');
+            setTimeout(() => calc.classList.remove('shake'), 1200);
+        }
+
+        function flash() {
+            calc.classList.add('flash');
+            setTimeout(() => calc.classList.remove('flash'), 900);
+        }
+
+        // Фейерверки при пасхалках
+        function createFirework() {
+            const symbols = ['💥', '✨', '🎉', '⭐️', '🌟'];
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const fw = document.createElement('div');
+                    fw.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    fw.style.position = 'fixed';
+                    fw.style.left = Math.random() * 100 + '%';
+                    fw.style.top = Math.random() * 100 + '%';
+                    fw.style.fontSize = '35px';
+                    fw.style.zIndex = '9999';
+                    fw.style.animation = 'fall 1.5s ease-out';
+                    document.body.appendChild(fw);
+                    setTimeout(() => fw.remove(), 1500);
+                }, i * 80);
+            }
+        }
+
+        // Обновляем функцию calculate для фейерверков
+        const originalCalculate = calculate;
+        calculate = function() {
+            const beforeValue = display.value;
+            originalCalculate();
+            const afterValue = display.value;
+            
+            if (afterValue !== "Ошибка" && eggs[parseInt(afterValue)]) {
+                createFirework();
             }
         }
     </script>
